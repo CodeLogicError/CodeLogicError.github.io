@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>常见保护措施及绕过 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="上一篇零零散散的写了一些内容，这一篇还是零零散散写一些内容 主要是基础知识简单介绍 常见保护措施用checksec就能直接看出来存在哪些保护措施  RELRO： RELocation Read-Only 针对 got 表的，简单理解为 call [so函数], 将该位置设置为不可写 。防止 got表劫持 Canary:   在函数返回值之前放置 fs:[0x28] 的值，函数返回时校验该值，静态插">
+<meta property="og:type" content="article">
+<meta property="og:title" content="常见保护措施及绕过">
+<meta property="og:url" content="http://example.com/2022/01/17/%E5%B8%B8%E8%A7%81%E4%BF%9D%E6%8A%A4%E6%8E%AA%E6%96%BD%E5%8F%8A%E7%BB%95%E8%BF%87/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="上一篇零零散散的写了一些内容，这一篇还是零零散散写一些内容 主要是基础知识简单介绍 常见保护措施用checksec就能直接看出来存在哪些保护措施  RELRO： RELocation Read-Only 针对 got 表的，简单理解为 call [so函数], 将该位置设置为不可写 。防止 got表劫持 Canary:   在函数返回值之前放置 fs:[0x28] 的值，函数返回时校验该值，静态插">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/.com//image-20220117201718610.png">
+<meta property="article:published_time" content="2022-01-17T12:20:19.000Z">
+<meta property="article:modified_time" content="2022-01-17T12:47:16.396Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/.com//image-20220117201718610.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+    
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/typeface-source-code-pro@0.0.71/index.min.css">
+
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+<meta name="generator" content="Hexo 6.0.0"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-常见保护措施及绕过" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2022/01/17/%E5%B8%B8%E8%A7%81%E4%BF%9D%E6%8A%A4%E6%8E%AA%E6%96%BD%E5%8F%8A%E7%BB%95%E8%BF%87/" class="article-date">
+  <time class="dt-published" datetime="2022-01-17T12:20:19.000Z" itemprop="datePublished">2022-01-17</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      常见保护措施及绕过
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>上一篇零零散散的写了一些内容，这一篇还是零零散散写一些内容</p>
+<p>主要是基础知识简单介绍</p>
+<h3 id="常见保护措施"><a href="#常见保护措施" class="headerlink" title="常见保护措施"></a>常见保护措施</h3><p>用checksec就能直接看出来存在哪些保护措施</p>
+<p><img src="/.com//image-20220117201718610.png"></p>
+<p>RELRO： RELocation Read-Only 针对 got 表的，简单理解为 call [so函数], 将该位置设置为不可写 。防止 got表劫持</p>
+<p>Canary:   在函数返回值之前放置 fs:[0x28] 的值，函数返回时校验该值，静态插桩实现。 减少栈溢出</p>
+<p>NX：Not eXecute 简单理解为 数据段不可执行，防止 shellcode。</p>
+<p>PIE： position-independent executable ,地址无关可执行文件。 通过重定位表实现，或者编译中全用相对地址。开启地址随机化(ALSR，系统设置)后可以更改模块加载基址，使得不能用绝对地址进行正常调用。 增大 rop 难度。</p>
+<h3 id="绕过方式"><a href="#绕过方式" class="headerlink" title="绕过方式"></a>绕过方式</h3><p>RELRO： 不用got劫持即可。</p>
+<p>Canary： 栈溢出前先泄露一个canary ，由于使用的是fs:[0x28] 。 在fs不修改的情况下，内容是一致的。一般情况下只有新进程创建时才会重新生成。 所以多线程，多进程(fork情况下)，可以尝试爆破canary。其他情况下尝试泄露canary。</p>
+<p>NX：数据段不可执行，代码段不受影响。ROP链即可。</p>
+<p>PIE： 通过一些手法泄露模块内地址，通过固定偏移即可找到模块基址，再找到任意你想要的地址。这里要注意，glibc版本非常多，有点麻烦。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2022/01/17/%E5%B8%B8%E8%A7%81%E4%BF%9D%E6%8A%A4%E6%8E%AA%E6%96%BD%E5%8F%8A%E7%BB%95%E8%BF%87/" data-id="ckyiomven0000m4v6gku37ctq" data-title="常见保护措施及绕过" class="article-share-link">Share</a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2022/01/12/test/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">test</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">January 2022</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2022/01/17/%E5%B8%B8%E8%A7%81%E4%BF%9D%E6%8A%A4%E6%8E%AA%E6%96%BD%E5%8F%8A%E7%BB%95%E8%BF%87/">常见保护措施及绕过</a>
+          </li>
+        
+          <li>
+            <a href="/2022/01/12/test/">test</a>
+          </li>
+        
+          <li>
+            <a href="/2022/01/12/what-is-pwn/">what is pwn</a>
+          </li>
+        
+          <li>
+            <a href="/2022/01/10/hello-world/">Hello World</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2022 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.4.1.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
